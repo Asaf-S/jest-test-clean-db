@@ -1,6 +1,9 @@
 import { test_withCleanDB } from 'jest-test-clean-db';
+import { getDbOrmOfTestingInstance } from '../dbOrmTestingInstance';
+import { DataSource } from 'typeorm';
 
-describe('Main describe', () => {
+describe('Main describe', async () => {
+
   describe('No DB involved', () => {
     test('Test which fails', () => {
       expect(true).toBeFalsy();
@@ -16,23 +19,23 @@ describe('Main describe', () => {
   });
 
   describe('DB involved', () => {
-    test_withCleanDB('Test which fails', () => {
+    test_withCleanDB('Test which fails', getDbOrmOfTestingInstance, () => {
       expect(true).toBeFalsy();
     });
 
-    test_withCleanDB('Test which throws an error', () => {
+    test_withCleanDB('Test which throws an error', getDbOrmOfTestingInstance, () => {
       throw new Error();
     });
 
     const TEST_NAME_WITH_DB = 'Test which succeeds';
-    test_withCleanDB(TEST_NAME_WITH_DB, ({ dbNameForThisTest, dbDataSource }) => {
+    test_withCleanDB(TEST_NAME_WITH_DB, getDbOrmOfTestingInstance, ({ dbNameForThisTest, dbDataSource }) => {
       expect(dbNameForThisTest).toMatch(new RegExp(`^\\d{17}-${TEST_NAME_WITH_DB}$`));
       expect(dbDataSource).toHaveProperty('isInitialized', true);
       expect(dbDataSource).toHaveProperty('isConnected', true);
       expect(dbDataSource.options.database).toMatch(dbNameForThisTest);
     });
 
-    test_withCleanDB('nameTooLong_nameTooLong_nameTooLong_nameTooLong_nameTooLong_nameTooLong_', ({ dbNameForThisTest, dbDataSource }) => {
+    test_withCleanDB('nameTooLong_nameTooLong_nameTooLong_nameTooLong_nameTooLong_nameTooLong_', getDbOrmOfTestingInstance, ({ dbNameForThisTest, dbDataSource }) => {
       // The test should fail before even starting - because the name is too long.
       expect(true).toBeTruthy();
     });

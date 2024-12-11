@@ -67,7 +67,7 @@ const unwrap = (testName: string, dataSourceInitiator: IDataSourceInitiator, use
   return underlyingFunctionToReturn;
 };
 
-// Initialize the DB
+// Initialize the DB ( template database should be already created in globalSetup )
 void getMainDataSource().createOrConnectToExistingTemplateDB();
 
 export const test_withCleanDB = (

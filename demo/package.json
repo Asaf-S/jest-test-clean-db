@@ -1,5 +1,6 @@
 {
   "name": "jest_postgresql_demo",
+  "type": "module",
   "description": "",
   "scripts": {
     "test_OLD": "jest --runInBand --detectOpenHandles --forceExit",

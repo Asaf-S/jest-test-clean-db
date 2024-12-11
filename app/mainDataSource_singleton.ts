@@ -33,50 +33,76 @@ export class MainDataSource {
     return this._dataSource;
   }
 
-  /**
-   * Create a template database for testing purposes, and runs migrations on it.
-   *
-   * @return {Promise<void>} Promise that resolves once the template database is created.
-   */
   async createOrConnectToExistingTemplateDB(): Promise<void> {
+    const isTemplateDatabaseExist = Boolean(getTemplateDatabaseName());
+
+    if (isTemplateDatabaseExist) {
+      await this.connectToExistingTemplateDB();
+    } else {
+      await this.createTemplateDB();
+    }
+  }
+
+  /**
+   * Connect to existing template database and return the DataSource
+   *
+   * @return {Promise<DataSource>}
+   */
+  async connectToExistingTemplateDB(): Promise<DataSource> {
     const existingTemplateDatabaseName = getTemplateDatabaseName();
 
+    if (!existingTemplateDatabaseName) {
+      throw new Error('existingTemplateDatabaseName: existing Template database couldn\'t able to find');
+    }
+
+    this._templateDbName = existingTemplateDatabaseName;
+
+    const templateDatabaseDataSource = new DataSource({
+      ...baseDataSourceOptions,
+      database: this._templateDbName,
+    });
+
+    await templateDatabaseDataSource.initialize();
+
+    // to keep the wasEverInitialized() return true
+    this._templateCreationPromise = Promise.resolve();
+
+    return templateDatabaseDataSource;
+  }
+
+  async createTemplateDB(): Promise<void> {
     if (!this._templateCreationPromise) {
       if (this._templateDbName) {
         throw new Error('jest-test-clean-db: Template database already created!');
       }
 
-      if (!existingTemplateDatabaseName) {
-        this._templateDbName = getTemplateDbName();
-      }
+      this._templateDbName = getTemplateDbName();
       consoleDebug(`Creating main template database with name "${this._templateDbName}"`);
-      this._templateCreationPromise = this.createOrConnectToDB(existingTemplateDatabaseName ?
-        { connectToDB_name: existingTemplateDatabaseName } : { createDB_name: this._templateDbName }
-      )
-        .then(async (templateDataSource) => {
-          setTemplateDatabaseName(this._templateDbName);
-          consoleDebug(`START - Applying migrations on the template database...`);
-          const before = Date.now();
-          await templateDataSource.runMigrations();
-          const after = Date.now();
-          consoleDebug(`FINISHED - Applying migrations on the template database... (${(after - before) / 1000} seconds)`);
-          return await closeConnection(templateDataSource);
-        });
+
+      this._templateCreationPromise = this._createTemplateDbAndRunMigrations(this._templateDbName);
     }
-    await this._templateCreationPromise;
+
+    return this._templateCreationPromise;
   }
 
-  createOrConnectToDB = async (input: { createDB_name: string } | { connectToDB_name: string }) => { 
-    
-    const dataSourceExisting = await this._getDataSource();
-    
-    if('connectToDB_name' in input && input.connectToDB_name) {
-      this._templateDbName = input.connectToDB_name;
-    }
+  private _createTemplateDbAndRunMigrations = async (templateDbName: string): Promise<void> => {
+    const templateDbDataSource = await this._createDB(templateDbName);
+    setTemplateDatabaseName(this._templateDbName);
 
-    if('createDB_name' in input && input.createDB_name) {
-      await createNewDbOrThrow(dataSourceExisting, input.createDB_name);
-    }
+    consoleDebug(`START - Applying migrations on the template database...`);
+    const before = Date.now();
+    await templateDbDataSource.runMigrations();
+
+    const after = Date.now();
+    consoleDebug(`FINISHED - Applying migrations on the template database... (${(after - before) / 1000} seconds)`);
+    return await closeConnection(templateDbDataSource);
+  }
+
+  private _createDB = async (dbName: string) => {
+
+    const dataSourceOfTestDB = await this._getDataSource();
+    await createNewDbOrThrow(dataSourceOfTestDB, dbName);
+
 
     const dataSourceNewlyInitiated = new DataSource({
       ...baseDataSourceOptions,
@@ -115,9 +141,10 @@ export class MainDataSource {
     const ds = await this._getDataSource();
     await deleteDb(ds, dbNameForThisTest);
   }
-  async closeAndDelete_templateDb() {
+  async closeAndDelete_templateDb(templateDbDataSource: DataSource) {
     if (this.wasEverInitialized()) {
       await this._templateCreationPromise;
+      await closeConnection(templateDbDataSource);
       const ds = await this._getDataSource();
       await deleteDb(ds, this._templateDbName);
     }

@@ -1,6 +1,6 @@
 {
   "name": "jest-test-clean-db",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "Clean DB, with the migration files pre-applied, per Jest test. No boilerplate code!",
   "main": "dist/index.js",
   "files": [
