@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+      "experimentalDecorators": true,
+      "module": "commonjs",
+      "esModuleInterop": true,
+      "target": "ES2017",
+      "noImplicitAny": true,
+      "noImplicitReturns": true,
+      "noImplicitThis": true,
+      "noEmitOnError": true,
+      "allowJs": false,
+      "alwaysStrict": true,
+      "strictBindCallApply": true,
+      "strictFunctionTypes": true,
+      "strictNullChecks": true,
+      "strictPropertyInitialization": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "emitDecoratorMetadata": true,
+      "moduleResolution": "node",
+      "sourceMap": true,
+      "outDir": "dist",
+      "declaration": true,
+      "baseUrl": "src",
+      "typeRoots": ["./types", "./node_modules/@types"],
+      "paths": {
+        "*": ["node_modules/*"]
+      }
+    },
+    "include": ["./*"],
+  }
+  

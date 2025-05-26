@@ -1,10 +1,18 @@
-import { DataSource } from 'typeorm';
-
-import { getMainDataSource, IDataSourceInitiator, MainDataSource } from './mainDataSource_singleton';
+import { DataSource } from "typeorm";
+import { Config, IDataSource_Options } from "./config";
+import { getMainDataSource, MainDataSource } from "./mainDataSource_singleton";
 import { takeFirstCharacters } from './utils';
 
 declare global {
   var mainDataSource: MainDataSource | undefined;
+}
+
+/**
+ * initializing package with config options
+ * @param dataSource_Options 
+ */
+export function initialize(dataSource_Options:IDataSource_Options ) {
+  Config.getInstance().initialize(dataSource_Options);
 }
 
 const MAX_TEST_NAME_LENGTH = 40;
@@ -19,7 +27,7 @@ const uniqueTestNames: Array<string> = [];
  * @return {Promise<void>} - A promise that resolves when the wrapped function completes successfully, or rejects with an error if the wrapped function throws an error.
  * @throws {Error} - If the test name exceeds the maximum allowed length or if the test name is not unique in the project.
  */
-const unwrap = (testName: string, dataSourceInitiator: IDataSourceInitiator, userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void) => {
+const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void) => {
   /**
    * Validation of the test name
    */
@@ -46,7 +54,7 @@ const unwrap = (testName: string, dataSourceInitiator: IDataSourceInitiator, use
      */
     const mainDataSource = getMainDataSource();
 
-    const { dbNameForThisTest, dbForThisTest } = await mainDataSource.createTestDb_fromTemplateDB(testName, dataSourceInitiator);
+    const { dbNameForThisTest, dbForThisTest } = await mainDataSource.createTestDb_fromTemplateDB(testName);
 
     let resultOfTheUnderlyingWrappedFunction: void = undefined;
     let errorFromTestFn: Error | null = null;
@@ -67,25 +75,20 @@ const unwrap = (testName: string, dataSourceInitiator: IDataSourceInitiator, use
   return underlyingFunctionToReturn;
 };
 
-// Initialize the DB ( template database should be already created in globalSetup )
-void getMainDataSource().createOrConnectToExistingTemplateDB();
-
 export const test_withCleanDB = (
   testName: string,
-  dataSourceInitiator: IDataSourceInitiator,
   userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void,
   timeout?: number,
 ) => {
   // Call the actual Jest's *test* function along with the (validated) test name and test function
-  return global.test(testName, unwrap(testName, dataSourceInitiator, userFn), timeout);
+  return global.test(testName, unwrap(testName, userFn), timeout);
 };
 
 export const describe_withCleanDb = (
   testName: number | string | Function | jest.FunctionLike,
-  dataSourceInitiator: IDataSourceInitiator,
   userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void
 ) => {
   // Call the actual Jest's *describe* function along with the (validated) block name and block function
   const _testName = typeof testName === 'function' || typeof testName === 'object' ? testName.name : String(testName);
-  return global.describe(testName, unwrap(_testName, dataSourceInitiator, userFn));
+  return global.describe(testName, unwrap(_testName, userFn));
 };

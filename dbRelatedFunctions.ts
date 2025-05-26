@@ -1,7 +1,6 @@
 import { DataSource } from 'typeorm';
-
+import { getSharedGlobalData, setSharedGlobalData } from './sharedGlobalData';
 import { consoleDebug } from './utils';
-import { filePath, getSharedGlobalData, setSharedGlobalData } from './sharedGlobalData';
 
 async function checkIfDbExists(dataSource: DataSource, dbName: string) {
   const result = await dataSource.query(`SELECT 1 FROM pg_database WHERE datname = '${dbName}'`);
@@ -15,30 +14,25 @@ async function assertDbDoesNotExist(dataSource: DataSource, dbName: string) {
   }
 }
 
-export async function createNewDbOrThrow(dataSource: DataSource, dbName: string) {
-  await assertDbDoesNotExist(dataSource, dbName);
-  await dataSource.query(`CREATE DATABASE "${dbName}"`);
+/**
+ * persist template database name in local file that can be shared throw different node process which created by jest on it's lifecycle
+ * just like: beforeAll, afterAll, beforeEach
+ * @param templateDbName
+ * @returns 
+ */
+export function saveTemplateDatabaseName(templateDbName: string) {
+  const sharedData = getSharedGlobalData();
+  return setSharedGlobalData({ ...sharedData, templateDbName });
 }
 
 export async function closeConnection(dataSource: DataSource) {
   await dataSource.destroy();
 }
 
-export function getTemplateDatabaseName(): string {
-  const sharedData = getSharedGlobalData();
-  if (!('templateDbName' in sharedData)) {
-    throw new Error(`Could not find required 'templateDbName' key in JSON file at ${filePath}`);
-  } else if (typeof sharedData.templateDbName !== 'string') {
-    throw new Error(`The value of 'templateDbName' key in JSON file at ${filePath} is not a string`);
-  }
-  return sharedData.templateDbName;
+export async function createNewDbOrThrow(dataSource: DataSource, dbName: string) {
+  await assertDbDoesNotExist(dataSource, dbName);
+  await dataSource.query(`CREATE DATABASE "${dbName}"`);
 }
-
-export function setTemplateDatabaseName(templateDbName: string) {
-  const sharedData = getSharedGlobalData();
-  return setSharedGlobalData({ ...sharedData, templateDbName });
-}
-
 
 export async function duplicateDbOrThrow(dataSource: DataSource, newDbName: string, templateDbName: string) {
   await assertDbDoesNotExist(dataSource, newDbName);
