@@ -1,6 +1,6 @@
 let templateDbName: string = '';
 
-export function getTemplateDbName() {
+export function getGeneratedTemplateDbName() {
   if (!templateDbName) {
     templateDbName = new Date()
       .toISOString()

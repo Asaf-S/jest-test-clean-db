@@ -3,8 +3,4 @@ node_modules
 dist
 .DS_Store
 coverage
-
-eslint.config.js
-
-app/LICENSE.txt
-app/README.md
+eslint.config.ts
