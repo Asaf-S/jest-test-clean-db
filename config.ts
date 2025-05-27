@@ -1,5 +1,5 @@
-import { BaseDataSourceOptions } from "typeorm/data-source/BaseDataSourceOptions";
-import { PostgresConnectionOptions } from "typeorm/driver/postgres/PostgresConnectionOptions";
+import { BaseDataSourceOptions } from 'typeorm/data-source/BaseDataSourceOptions';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
 const DEFAULT_PORT = 5432;
 
@@ -9,7 +9,7 @@ export type IDataSource_Options = {
   migrationsRun: boolean;
   logging: boolean;
   synchronize: boolean;
-} & Pick<BaseDataSourceOptions, 'entities'>
+} & Pick<BaseDataSourceOptions, 'entities'>;
 
 export class Config {
   private static instance: Config;
@@ -35,8 +35,11 @@ export class Config {
   }
 
   getPostgresConnectionOptions(): PostgresConnectionOptions {
-    if(this.postgresConnectionOptions) {
+    if (this.postgresConnectionOptions) {
       return this.postgresConnectionOptions;
-    } else throw new Error('this.postgresConnectionOptions is missing, please make sure that you invoked initialize method with config options prior');
+    } else
+      throw new Error(
+        'this.postgresConnectionOptions is missing, please make sure that you invoked initialize method with config options prior'
+      );
   }
 }

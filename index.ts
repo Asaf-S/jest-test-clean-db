@@ -1,6 +1,6 @@
-import { DataSource } from "typeorm";
-import { Config, IDataSource_Options } from "./config";
-import { getMainDataSource, MainDataSource } from "./mainDataSource_singleton";
+import { DataSource } from 'typeorm';
+import { Config, IDataSource_Options } from './config';
+import { getMainDataSource, MainDataSource } from './mainDataSource_singleton';
 import { takeFirstCharacters } from './utils';
 
 declare global {
@@ -9,9 +9,9 @@ declare global {
 
 /**
  * initializing package with config options
- * @param dataSource_Options 
+ * @param dataSource_Options
  */
-export function initialize(dataSource_Options:IDataSource_Options ) {
+export function initialize(dataSource_Options: IDataSource_Options) {
   Config.getInstance().initialize(dataSource_Options);
 }
 
@@ -27,7 +27,10 @@ const uniqueTestNames: Array<string> = [];
  * @return {Promise<void>} - A promise that resolves when the wrapped function completes successfully, or rejects with an error if the wrapped function throws an error.
  * @throws {Error} - If the test name exceeds the maximum allowed length or if the test name is not unique in the project.
  */
-const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void) => {
+const unwrap = (
+  testName: string,
+  userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void
+) => {
   /**
    * Validation of the test name
    */
@@ -42,7 +45,7 @@ const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; 
         : '';
     throw new Error(
       `Test name (${_describeBlockPrefix}${shortenedTestName}) is not unique in this project.\n` +
-      `This might cause it to use the same DB of another test.${_errMsgPostfix}`
+        `This might cause it to use the same DB of another test.${_errMsgPostfix}`
     );
   } else {
     uniqueTestNames.push(testName);
@@ -78,7 +81,7 @@ const unwrap = (testName: string, userFn: (dbData: { dbNameForThisTest: string; 
 export const test_withCleanDB = (
   testName: string,
   userFn: (dbData: { dbNameForThisTest: string; dbDataSource: DataSource }) => Promise<void> | void,
-  timeout?: number,
+  timeout?: number
 ) => {
   // Call the actual Jest's *test* function along with the (validated) test name and test function
   return global.test(testName, unwrap(testName, userFn), timeout);

@@ -18,7 +18,7 @@ async function assertDbDoesNotExist(dataSource: DataSource, dbName: string) {
  * persist template database name in local file that can be shared throw different node process which created by jest on it's lifecycle
  * just like: beforeAll, afterAll, beforeEach
  * @param templateDbName
- * @returns 
+ * @returns
  */
 export function saveTemplateDatabaseName(templateDbName: string) {
   const sharedData = getSharedGlobalData();
