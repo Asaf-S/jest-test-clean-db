@@ -5,6 +5,3 @@ dist
 coverage
 
 eslint.config.js
-
-app/LICENSE.txt
-app/README.md

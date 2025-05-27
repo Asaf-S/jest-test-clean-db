@@ -21,11 +21,11 @@
     "sourceMap": true,
     "outDir": "dist",
     "declaration": true,
-    "baseUrl": "app",
-    // "typeRoots": ["./node_modules/**/*"],
+    "baseUrl": "src",
+    "typeRoots": ["./types", "./node_modules/@types"],
     "paths": {
       "*": ["node_modules/*"]
     }
   },
-  // "include": ["./*"],
+  "include": ["./*"]
 }
