@@ -3,7 +3,7 @@ import path from 'path';
 
 const filePath = path.resolve(__dirname, 'sharedGlobalData.json');
 
-export const getSharedGlobalData = (): Record<string, any> => {
+export const getSharedGlobalData = (): Record<string, unknown> => {
     let data: string | undefined;
     if (fs.existsSync(filePath)) {
         data = fs.readFileSync(filePath, 'utf-8');
