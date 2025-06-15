@@ -1,141 +1,109 @@
-<!-- spell-checker:ignore typeof -->
+# HB_BE_LMS - Backend Testing Setup
 
-# jest-test-clean-db
+This project uses `jest-test-clean-db-postgres` for managing test database operations in a PostgreSQL environment. This setup ensures that tests run in isolation with a clean database state.
 
-[![npm version](https://badge.fury.io/js/jest-test-clean-db.svg)](https://badge.fury.io/js/jest-test-clean-db)
-[![Downloads](https://img.shields.io/npm/dm/jest-test-clean-db.svg)](https://www.npmjs.com/package/jest-test-clean-db)
-[![GitHub issues](https://img.shields.io/github/issues/Asaf-S/jest-test-clean-db)](https://github.com/Asaf-S/jest-test-clean-db/issues)
+## Test Database Setup
 
-## Purpose
-For each `jest` run, this library will:
-1. Creates a new empty "template" DB.
-1. Applies the TypeORM migrations files on it.
-1. For each pre-selected test:
-    1. Make a copy of the "template" DB (which contains the migration files' changes).
-    1. Run the test as usual on a empty prepared DB.
-1. Clean up.
+### Prerequisites
 
-## Installing
+- Node.js v18.20.4
+- PostgreSQL database
+- pnpm package manager
 
-For the latest stable version:
+### Configuration
 
-```bash
-npm install -D jest-test-clean-db@latest
-```
-
-## Setup (after installation)
-
-### Prerequisite ( Add ENV ):
-Add ENV variable in your .env `TYPEORM_DS_OPTIONS_PATH` with the path of the dsOptions_config.js file.   
-for eg:  `TYPEORM_DS_OPTIONS_PATH=dist/src/db`
-
-### Step 1: **Use the `test_withCleanDB` and `describe_withCleanDB` functions**:
-
-Import the `test_withCleanDB` and `describe_withCleanDB` functions, and use them instead of `test` and `describe` wherever you need a clean initialized DB in your test files:
+The test database setup is configured in `apps/BE/jest.beforeAll.ts`. The configuration includes:
 
 ```typescript
-// some_test_file.test.ts
-import { test_withCleanDB } from 'jest-test-clean-db';
-
-describe('D1', () => {
-  test_withCleanDB('Test with a clean DB', ({ dbNameForThisTest, dbDataSource }) => {
-    expect(dbNameForThisTest).toBeTrue();
-
-    const userRepository = dbDataSource.getRepository(Users);
-    await userRepository.insert({ name: 'test1' });
-    const user = await userRepository.findOne({ where: { id: 1 } });
-    expect(user).not.toBeNull();
-  });
-
-  test('test2', async () => {
-    // No clean DB for you
-  });
-});
-
-describe_withCleanDB('D2', ({ dbNameForThisTest, dbDataSource }) => {
-  test('T1', () => {
-    // Uses the same clean DB as the 'T2' test
-    expect(typeof dbNameForThisTest).toEqual('string');
-    dbDataSource.getRepository(Users);
-  });
-
-  test('T2', () => {
-    // Uses the same clean DB as the 'T1' test
-    expect(typeof dbNameForThisTest).toEqual('string');
-    dbDataSource.getRepository(Users);
-  });
+initialize({
+  type: 'postgres',
+  entities: typeOrmEntities,
+  migrations: [LOCATION_OF_MIGRATION_JS_FILES],
+  migrationsRun: true,
+  logging: utils.isReallyTrue(process.env.POSTGRESQL_DEBUGGING),
+  synchronize: false,
 });
 ```
 
-### Step 2: **Env params**:
+### Key Features
 
-Add the following environment params to reach your testing DB (if this solution doesn't fit your need, leave an issue and let me know):
+1. **Automatic Database Cleanup**: Before each test suite runs, the database is automatically cleaned.
+2. **Migration Support**: All migrations are run automatically before tests start.
+3. **TypeORM Integration**: Works seamlessly with TypeORM entities and migrations.
+4. **Environment Variables**: Uses environment variables for configuration:
+   - `POSTGRESQL_DEBUGGING`: Enable/disable SQL query logging
+   - `IS_TEST`: Set to '1' to indicate test environment
+   - `TEST_START_TIMESTAMP`: Timestamp for test run identification
 
-```JS
-TEST_POSTGRESQL_HOSTNAME=
-TEST_POSTGRESQL_DB_NAME=
-TEST_POSTGRESQL_USERNAME=
-TEST_POSTGRESQL_PASSWORD=
+### Test Environment Setup
+
+The project uses several Jest configuration files:
+
+1. `jest.beforeAll.ts`: Global setup before all tests
+2. `jest.afterAll.ts`: Global teardown after all tests
+3. `jest.beforeEach.ts`: Setup before each test
+4. `jest.config.ts`: Main Jest configuration
+
+### Running Tests
+
+To run tests, use the following commands:
+
+```bash
+# Run all tests
+pnpm run test
+
+# Run a specific test
+pnpm run test_single
 ```
 
-### Step 3: **Edit the `jest.config.js` file**:
+The test command uses the following Jest options:
+- `--runInBand`: Run tests serially
+- `--detectOpenHandles`: Detect and report open handles
+- `--forceExit`: Force Jest to exit after all tests complete
 
-Add the following values to the following Jest's config file's keys:
+### Error Handling
 
-```javascript
-// jest.config.js
-{
-  // ...
-  "globalSetup": "jest-test-clean-db/globalSetup",
-  "globalTeardown": "jest-test-clean-db/globalTeardown"
-  // ...
-}
-```
+The test setup includes comprehensive error handling:
 
-<details>
-  <summary>Click to read why must this step be done, despite everything seems to work without it</summary>
+1. **Unhandled Promise Rejections**: Catches and logs unhandled promise rejections with detailed information about the cause.
+2. **Uncaught Exceptions**: Logs uncaught exceptions with stack traces.
+3. **Graceful Shutdown**: Implements a 1-second delay before process exit to ensure proper cleanup.
 
-If you just use the functions `test_withCleanDB` and `describe_withCleanDB` - everything will seem to be working, however, 2 databases will be created per such test/describe (one will be used as a "template" and copy of it for the test - both will be created per test/describe created with the special functions), and also only one of them (the test database) will be deleted, while the "template" database will remain, which will cause the DB to be filled-up eventually and throw errors.
-In order to avoid such behavior, and to cause everything to work as expected - you need to add the following values to the following Jest's config file's keys:
+### Best Practices
 
-</details>
-<details>
-  <summary>Having problems with this step? Click to read more...</summary>
+1. **Database Isolation**: Each test suite runs with a clean database state.
+2. **Migration Management**: Always run migrations before tests.
+3. **Error Logging**: Comprehensive error logging for debugging.
+4. **Environment Separation**: Clear separation between test and production environments.
 
-The `globalSetup` key accept only string, this is why you can't add an array as its value.
+### Common Issues and Solutions
 
-It means that this is not possible: `"globalSetup": ["./localGlobalSetupFile", "jest-test-clean-db/globalSetup"]`.
+1. **Database Connection Issues**:
+   - Ensure PostgreSQL is running
+   - Check database credentials in environment variables
+   - Verify database user permissions
 
-The way to get around it, is to add the following line as the first one in the existing file (`localGlobalSetupFile.js` in our example:
-```js
-// file: localGlobalSetupFile.js
-import 'jest-test-clean-db/globalSetup';
-```
+2. **Migration Failures**:
+   - Ensure all migration files are in the correct location
+   - Check migration file syntax
+   - Verify database schema compatibility
 
-This solves this error message:
-```
-Option "globalSetup" must be of type:
-  string
-but instead received:
-  array
-Example:
-{
-  "globalSetup": "setup.js"
-}
-Configuration Documentation:
-https://jestjs.io/docs/configuration
-```
-</details>
+3. **Test Timeouts**:
+   - Default timeout is set to 20000ms
+   - Adjust timeout in jest.config.ts if needed
+   - Check for long-running operations in tests
 
-## Wanna help out?
+### Development Workflow
 
-- [ ] Add support for other ways to connect to the DB (connection string? import details from a file?).
-- [ ] Add support for other ORMs.
-- [ ] Add support for MySQL and other DBs.
-- [ ] Better test `describe_withCleanDB`.
-- [ ] Make the test file of the repository's demo project work despite testing failed tests (maybe forward the tests' output to a file, and compare the file with a pre-defined one).
+1. Write tests in the `src` directory with `.test.ts` or `.spec.ts` extension
+2. Run `pnpm run build:packages` after making changes in the `packages/` directory
+3. Use `pnpm run test` to verify changes
+4. Check coverage reports in the `coverage` directory
 
-<!--
-  TODO:
-  1. Explain JEST_TEST_CLEAN_DB_DEBUG env param somewhere;
--->
+### Additional Notes
+
+- The project uses TypeScript for type safety
+- Jest is configured to collect coverage information
+- Tests run in a Node.js environment
+- Custom reporters are used for better test output formatting
+- Environment variables are loaded using dotenv

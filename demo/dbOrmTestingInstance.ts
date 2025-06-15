@@ -13,39 +13,38 @@ const distFolder = __dirname.includes('/dist/src/db') ? __dirname : __dirname.re
 const LOCATION_OF_MIGRATION_JS_FILES = distFolder + '/migrations/**/*.{js,ts}';
 const DEFAULT_PORT = 5432;
 
-
 export async function getDbOrmOfTestingInstance() {
-    let dsOptions: DataSourceOptions = {
-        type: 'postgres',
-        entities: [],
-        migrations: [LOCATION_OF_MIGRATION_JS_FILES],
-        migrationsRun: true,
-        synchronize: false,
-        dropSchema: true,
-    };
+  let dsOptions: DataSourceOptions = {
+    type: 'postgres',
+    entities: [],
+    migrations: [LOCATION_OF_MIGRATION_JS_FILES],
+    migrationsRun: true,
+    synchronize: false,
+    dropSchema: true,
+  };
 
-    const dbConfigFromEnvParams_test = {
-        host: process.env.TEST_POSTGRESQL_HOSTNAME,
-        username: process.env.TEST_POSTGRESQL_USERNAME,
-        password: process.env.TEST_POSTGRESQL_PASSWORD,
-        database: process.env.TEST_POSTGRESQL_DB_NAME,
-    };
+  const dbConfigFromEnvParams_test = {
+    host: process.env.TEST_POSTGRESQL_HOSTNAME,
+    username: process.env.TEST_POSTGRESQL_USERNAME,
+    password: process.env.TEST_POSTGRESQL_PASSWORD,
+    database: process.env.TEST_POSTGRESQL_DB_NAME,
+  };
 
-    const sslRelatedSettings: Partial<{ ssl: true }> = {};
+  const sslRelatedSettings: Partial<{ ssl: true }> = {};
 
-    if (Boolean(process.env.POSTGRESQL_SSL)) {
-        sslRelatedSettings.ssl = true;
-    }
+  if (Boolean(process.env.POSTGRESQL_SSL)) {
+    sslRelatedSettings.ssl = true;
+  }
 
-    const dataSourceOptions = {
-        port: DEFAULT_PORT,
-        ...dsOptions,
-        ...dbConfigFromEnvParams_test,
-        ...sslRelatedSettings,
-    };
+  const dataSourceOptions = {
+    port: DEFAULT_PORT,
+    ...dsOptions,
+    ...dbConfigFromEnvParams_test,
+    ...sslRelatedSettings,
+  };
 
-    const dataSourceInstance = new DataSource(dataSourceOptions);
-    dataSourceInstance.initialize();
+  const dataSourceInstance = new DataSource(dataSourceOptions);
+  dataSourceInstance.initialize();
 
-    return dataSourceInstance;
+  return dataSourceInstance;
 }

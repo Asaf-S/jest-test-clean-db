@@ -69,7 +69,7 @@ module.exports = {
   globalSetup: 'jest-test-clean-db/globalSetup',
 
   // A path to a module which exports an async function that is triggered once after all test suites
-  globalTeardown:  'jest-test-clean-db/globalTeardown',
+  globalTeardown: 'jest-test-clean-db/globalTeardown',
 
   // A set of global variables that need to be available in all test environments
   // globals: {},

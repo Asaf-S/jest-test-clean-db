@@ -3,7 +3,6 @@ import { getDbOrmOfTestingInstance } from '../dbOrmTestingInstance';
 import { DataSource } from 'typeorm';
 
 describe('Main describe', async () => {
-
   describe('No DB involved', () => {
     test('Test which fails', () => {
       expect(true).toBeFalsy();
@@ -35,10 +34,14 @@ describe('Main describe', async () => {
       expect(dbDataSource.options.database).toMatch(dbNameForThisTest);
     });
 
-    test_withCleanDB('nameTooLong_nameTooLong_nameTooLong_nameTooLong_nameTooLong_nameTooLong_', getDbOrmOfTestingInstance, ({ dbNameForThisTest, dbDataSource }) => {
-      // The test should fail before even starting - because the name is too long.
-      expect(true).toBeTruthy();
-    });
+    test_withCleanDB(
+      'nameTooLong_nameTooLong_nameTooLong_nameTooLong_nameTooLong_nameTooLong_',
+      getDbOrmOfTestingInstance,
+      ({ dbNameForThisTest, dbDataSource }) => {
+        // The test should fail before even starting - because the name is too long.
+        expect(true).toBeTruthy();
+      }
+    );
 
     // const TEST_WITH_THE_SAME_NAME = 'TEST_WITH_THE_SAME_NAME';
     // test_withCleanDB(TEST_WITH_THE_SAME_NAME, ({ dbNameForThisTest, dbDataSource }) => {
