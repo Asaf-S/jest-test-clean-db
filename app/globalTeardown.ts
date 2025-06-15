@@ -8,4 +8,3 @@ export default async () => {
   await mainDataSource.closeAndDelete_templateDb();
   return dumpSharedGlobalData();
 };
-// sync

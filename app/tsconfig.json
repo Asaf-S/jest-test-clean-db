@@ -21,19 +21,11 @@
     "sourceMap": true,
     "outDir": "dist",
     "declaration": true,
-    "baseUrl": "src",
+    "baseUrl": "app",
     "typeRoots": ["./types", "./node_modules/@types"],
     "paths": {
       "*": ["node_modules/*"]
     }
   },
-  "include": [
-    "./*",
-    "app/globalSetup.ts",
-    "app/globalSetup.js",
-    "app/globalTeardown.js",
-    "app/globalTeardown.ts",
-    "app/index.ts",
-    "app/mainDataSource_singleton.ts"
-  ]
+  "include": ["./*"]
 }
