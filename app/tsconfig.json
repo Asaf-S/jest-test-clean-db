@@ -31,8 +31,8 @@
     "./*",
     "app/globalSetup.ts",
     "app/globalSetup.js",
-    "app/globalTearDown.js",
-    "app/globalTearDown.ts",
+    "app/globalTeardown.js",
+    "app/globalTeardown.ts",
     "app/index.ts",
     "app/mainDataSource_singleton.ts"
   ]

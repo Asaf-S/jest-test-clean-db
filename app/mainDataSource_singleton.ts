@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import dotenv from 'dotenv';
 import { Config } from './config';
-import { getGeneratedTemplateDbName } from '../templateDbNameGenerator_singleton';
+import { getGeneratedTemplateDbName } from './templateDbNameGenerator_singleton';
 import { consoleDebug } from './utils';
 import {
   closeConnection,
