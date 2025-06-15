@@ -27,5 +27,13 @@
       "*": ["node_modules/*"]
     }
   },
-  "include": ["./*"]
+  "include": [
+    "./*",
+    "app/globalSetup.ts",
+    "app/globalSetup.js",
+    "app/globalTearDown.js",
+    "app/globalTearDown.ts",
+    "app/index.ts",
+    "app/mainDataSource_singleton.ts"
+  ]
 }
