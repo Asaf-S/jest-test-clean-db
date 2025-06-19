@@ -3,7 +3,7 @@
   "description": "Clean DB, with the migration files pre-applied, per Jest test. No boilerplate code!",
   "main": "index.js",
   "scripts": {
-    "release": "pnpm run task:copy_meta_files && pnpm --filter ./app run release && pnpm run task:remove_meta_files",
+    "release": "pnpm install && pnpm run task:copy_meta_files && pnpm --filter ./app run release && pnpm run task:remove_meta_files",
     "task:test": "pnpm --parallel run test",
     "task:copy_meta_files": "shx cp ./{LICENSE.txt,README.md} ./app",
     "task:remove_meta_files": "shx rm ./app/LICENSE.txt ./app/README.md",
